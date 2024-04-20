@@ -9,14 +9,32 @@ def main():
     running = True
 
     DISPLAYSURF.fill("black")
-
+    user_text = ""
     list = LinkedList(5)
     list.draw(DISPLAYSURF)
+    input = list.get_input_field()
     while running:
         for event in pygame.event.get():
-            #   start handling clicking on buttons
+            # need to handle unselecting input FIELD
+            # need to handle validation of input ONLY NUMBERS
+            # better deleting
+            # and clicking to other buttons
+            # transfer value to first array
             if event.type == pygame.MOUSEBUTTONDOWN:
-                pass
+                if input.collidepoint(event.pos):
+                    list.toggle_active(DISPLAYSURF)
+
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_BACKSPACE:
+                    user_text = user_text[:1]
+
+                elif event.key == pygame.K_ESCAPE:
+                    pygame.quit()
+                else:
+                    user_text += event.unicode
+
+            list.drawText(input, DISPLAYSURF, user_text)
+
             if event.type == pygame.QUIT:
                 running = False
         pygame.display.flip()
@@ -27,6 +45,7 @@ def main():
 class LinkedList(pygame.sprite.Sprite):
     array = []
     color = "white"
+    color_selected = "purple"
     window_info = None
     lr_position = -175
     heigh_position = None
@@ -34,9 +53,9 @@ class LinkedList(pygame.sprite.Sprite):
     pop_btn = None
     clear_btn = None
     input_field = None
+    input_field_active = False
     font = None
 
-    # handle input for list
     def __init__(self, number_of_cells):
         super().__init__()
         self.window_info = pygame.display.get_window_size()
@@ -44,6 +63,17 @@ class LinkedList(pygame.sprite.Sprite):
         self.font = pygame.font.Font("freesansbold.ttf", 12)
         self.init_array(number_of_cells)
         self.init_controls()
+
+    def get_input_field(self):
+        return self.input_field
+
+    def toggle_active(self, DISPLAYSURF):
+        if self.input_field is not None:
+            self.input_field_active = not self.input_field_active
+            pygame.draw.rect(DISPLAYSURF, self.color_selected, self.input_field)
+
+        else:
+            raise ValueError("INPUT FIELD IS NOT INITIALIZED")
 
     def init_array(self, number_of_cells):
         x = self.lr_position
